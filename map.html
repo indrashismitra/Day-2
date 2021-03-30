@@ -1,0 +1,68 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
+    <style>
+      html, body {
+        height: 95%;
+        padding: 0;
+        margin: 0;
+      }
+      #map {
+        /* configure the size of the map */
+        width: 100%;
+        height: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <input type="text" id="search" placeholder="Indore"></input>
+    <button onclick="searchFunc()">SEARCH</button>
+    <script>
+      // initialize Leaflet
+      let map = L.map('map').setView({lon:0, lat: 0}, 2);
+                // add the OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap contributors</a>'
+        }).addTo(map);
+
+        // show the scale bar on the lower left corner
+        L.control.scale().addTo(map);
+
+        // show a marker on the map
+        L.marker({lon: 0, lat: 0}).addTo(map);
+        function searchFunc(){
+            map.remove();
+            let par = document.getElementById("search").value;
+            let xhr = new XMLHttpRequest();
+            xhr.open('GET', "https://nominatim.openstreetmap.org/search?q="+par+"&format=json&limit=1", true);
+            xhr.send();
+            xhr.onreadystatechange = processRequest;
+                function processRequest(e) {
+                    if (xhr.readyState == 4 && xhr.status == 200) {
+                        let response = JSON.parse(xhr.responseText);
+                        console.log(response);
+                        map = L.map('map').setView({lon: response[0].lon, lat: response[0].lat}, 10);
+                        // add the OpenStreetMap tiles
+                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                            maxZoom: 19,
+                            attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap contributors</a>'
+                        }).addTo(map);
+
+                        // show the scale bar on the lower left corner
+                        L.control.scale().addTo(map);
+
+                        // show a marker on the map
+                        L.marker({lon: response[0].lon, lat: response[0].lat}).addTo(map);
+
+                    }
+                }
+            };
+    </script>
+  </body>
+</html>
